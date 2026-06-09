@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استعراض حركات المافيا الـ 11</title>
+    <title>مستعرض حركات المافيا المحلي</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #111; font-family: Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: Arial, sans-serif; }
         canvas { display: block; }
         
-        /* قائمة جانبية ذكية للأزرار الـ 11 تدعم التمرير على الهاتف */
+        /* قائمة الأزرار الجانبية للتمرير على الهاتف */
         #controls-container {
             position: absolute;
             top: 10px;
@@ -20,15 +20,13 @@
             gap: 6px;
             z-index: 10;
             padding-right: 12px;
-            /* إخفاء شريط التمرير الافتراضي لشكل أجمل */
-            scrollbar-width: thin;
         }
         
         button {
             padding: 10px 14px;
             font-size: 13px;
             font-weight: bold;
-            background-color: #2196F3;
+            background-color: #e91e63;
             color: white;
             border: none;
             border-radius: 6px;
@@ -37,10 +35,8 @@
             text-align: right;
             min-width: 160px;
         }
-        
-        button:active { background-color: #0b7dda; transform: scale(0.97); }
-        
-        /* شاشة صغيرة توضح اسم الحركة الحالية */
+        button:active { background-color: #c2185b; transform: scale(0.97); }
+
         #status {
             position: absolute;
             top: 10px;
@@ -58,68 +54,53 @@
 </head>
 <body>
 
-    <div id="status">الحركة الحالية: وضعية الاستعداد بالرشاش</div>
+    <div id="status">الحركة الحالية: وضعية الرشاش</div>
 
     <div id="controls-container">
-        <button onclick="changeAnim('anim1', '1. وضعية الاستعداد بالرشاش')">1. وضعية الرشاش</button>
-        <button onclick="changeAnim('anim2', '2. الركض السريع للخلف')">2. ركض للخلف</button>
-        <button onclick="changeAnim('anim3', '3. الطعن بالخنجر الثنائي')">3. طعن بالخنجر</button>
-        <button onclick="changeAnim('anim4', '4. حركة الموت الجانبي')">4. حركة الموت 1</button>
-        <button onclick="changeAnim('anim5', '5. إطلاق النار بالرشاش')">5. إطلاق النار</button>
-        <button onclick="changeAnim('anim6', '6. القفز لأعلى')">6. قفز للأعلى</button>
-        <button onclick="changeAnim('anim7', '7. حركة الموت والسقوط')">7. حركة الموت 2</button>
-        <button onclick="changeAnim('anim8', '8. التفات وركل بالرشاش')">8. التفات وركل</button>
-        <button onclick="changeAnim('anim9', '9. ركلة قتال MMA')">9. ركلة MMA</button>
-        <button onclick="changeAnim('anim10', '10. حركة إضافية 1')">10. حركة مدمجة 1</button>
-        <button onclick="changeAnim('anim11', '11. حركة إضافية 2')">11. حركة مدمجة 2</button>
+        <button onclick="changeAnim('Rifle Aiming Idle.glb', '1. وضعية الرشاش')">1. وضعية الرشاش</button>
+        <button onclick="changeAnim('Sprint Backward.glb', '2. ركض للخلف')">2. ركض للخلف</button>
+        <button onclick="changeAnim('Double Dagger Stab.glb', '3. طعن بالخنجر')">3. طعن بالخنجر</button>
+        <button onclick="changeAnim('Dying.glb', '4. حركة الموت 1')">4. حركة الموت 1</button>
+        <button onclick="changeAnim('Firing Rifle.glb', '5. إطلاق النار')">5. إطلاق النار</button>
+        <button onclick="changeAnim('Jump Up.glb', '6. قفز للأعلى')">6. قفز للأعلى</button>
+        <button onclick="changeAnim('Death From Right.glb', '7. حركة الموت 2')">7. حركة الموت 2</button>
+        <button onclick="changeAnim('Rifle Turn And Kick.glb', '8. التفات وركل')">8. التفات وركل</button>
+        <button onclick="changeAnim('Mma Kick.glb', '9. ركلة MMA')">9. ركلة MMA</button>
     </div>
 
-    <script type="module">
-        import * as THREE from 'https://template.unbxd.com/prod/v2/js/three.module.js';
-        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
 
+    <script>
+        // الكود البرمجي المستقر
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x151515);
+        scene.background = new THREE.Color(0x1a1a1a);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // إضاءة غنية لإكساب الجسد والملابس بريقاً ووضوحاً ممتازاً
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
+        // إضاءة قوية جداً لكساء اللحم والملابس
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2.5);
         scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
-        dirLight.position.set(3, 8, 5);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+        dirLight.position.set(3, 10, 5);
         scene.add(dirLight);
 
-        const loader = new GLTFLoader();
+        const loader = new THREE.GLTFLoader();
         let mixer, currentModel;
 
-        // تم تحويل روابط Google Drive الخاصة بك بالكامل إلى روابط استدعاء مباشر للكود البرمجي
-        const animationUrls = {
-            anim1: 'https://docs.google.com/uc?export=download&id=1tJvSZdaxeRLmNWlG114nS9XTJ-wWz-gt',
-            anim2: 'https://docs.google.com/uc?export=download&id=1zIWH4yk30PyQdUBkHcYFVsYwBcdm3OG0',
-            anim3: 'https://docs.google.com/uc?export=download&id=1B5OAtZTRO91N1LGq_gsCO_QthjnpN3-C',
-            anim4: 'https://docs.google.com/uc?export=download&id=1kD155w7OQ0a6azDdCwKIagwCStpvPrtH',
-            anim5: 'https://docs.google.com/uc?export=download&id=1XgDmGoomTZ7Zg97QPHTIQdP1nLS1OKVc',
-            anim6: 'https://docs.google.com/uc?export=download&id=1TRZuY-bcJdfQooWKuP5LzhVIjHDe13pE',
-            anim7: 'https://docs.google.com/uc?export=download&id=1C2_JSabzTbQDJcScCc7SOygtbDsWd_S4',
-            anim8: 'https://docs.google.com/uc?export=download&id=1k4_2yAY17SSYuw0AG88IyOl6NAprPJby',
-            anim9: 'https://docs.google.com/uc?export=download&id=1U3YEzVTxzU41AMRwCjd1-7Xg4vWc73eG',
-            anim10: 'https://docs.google.com/uc?export=download&id=1U3YEzVTxzU41AMRwCjd1-7Xg4vWc73eG', // الرابط المتكرر التاسع
-            anim11: 'https://docs.google.com/uc?export=download&id=127OqA65-lx_iGSnp1UJIlleYIrtBZhJ8'
-        };
-
-        window.loadModel = function(url) {
+        window.loadModel = function(fileName) {
             if (currentModel) scene.remove(currentModel);
             if (mixer) mixer.stopAllAction();
 
-            loader.load(url, (gltf) => {
+            // التحميل محلياً من نفس المجلد
+            loader.load(fileName, (gltf) => {
                 currentModel = gltf.scene;
                 scene.add(currentModel);
 
-                // موازنة موضع الشخصية البشرية في مركز الشاشة
+                // ضبط وضعية المجسم في المنتصف تماماً
                 currentModel.position.set(0, -60, 0);
                 currentModel.scale.set(1, 1, 1); 
 
@@ -129,15 +110,15 @@
                     action.play();
                 }
             }, undefined, (error) => {
-                console.error("جاري الاتصال بالسيرفر وجلب ملف الحركة...");
+                console.error("الملف غير موجود في المجلد، تأكد من نقل الملفات بجانب index.html");
             });
         }
 
-        // تشغيل الحركة الأولى تلقائياً عند تحميل الصفحة
-        window.loadModel(animationUrls.anim1);
+        // تشغيل الحركة الأولى تلقائياً من الذاكرة
+        window.loadModel('Rifle Aiming Idle.glb');
 
-        // ضبط أبعاد وموقع الكاميرا لتناسب هيكل شخصياتك
-        camera.position.set(0, 30, 145);
+        // إعدادات الكاميرا المخصصة لرجال المافيا عندك
+        camera.position.set(0, 30, 140);
         camera.lookAt(0, 30, 0);
 
         const clock = new THREE.Clock();
@@ -149,10 +130,10 @@
         }
         animate();
 
-        // دالة تبديل الحركات والملفات عند نقر المستخدم
-        window.changeAnim = function(animKey, animName) {
+        // دالة تغيير الحركة عند الضغط
+        window.changeAnim = function(fileName, animName) {
             document.getElementById('status').innerText = "الحركة الحالية: " + animName;
-            window.loadModel(animationUrls[animKey]);
+            window.loadModel(fileName);
         }
 
         window.addEventListener('resize', () => {
