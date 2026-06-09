@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاهدة حركات المافيا الـ 11</title>
+    <title>استعراض حركات المافيا الـ 11</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #111; font-family: Arial, sans-serif; }
         canvas { display: block; }
         
-        /* تصميم قائمة الأزرار الجانبية لتستوعب الـ 11 حركة بدون تشويه الشاشة */
+        /* قائمة جانبية ذكية للأزرار الـ 11 تدعم التمرير على الهاتف */
         #controls-container {
             position: absolute;
             top: 10px;
             left: 10px;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             z-index: 10;
-            padding-right: 10px;
+            padding-right: 12px;
+            /* إخفاء شريط التمرير الافتراضي لشكل أجمل */
+            scrollbar-width: thin;
         }
         
         button {
-            padding: 10px 16px;
-            font-size: 14px;
+            padding: 10px 14px;
+            font-size: 13px;
             font-weight: bold;
             background-color: #2196F3;
             color: white;
@@ -33,40 +35,43 @@
             cursor: pointer;
             box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             text-align: right;
-            min-width: 150px;
+            min-width: 160px;
         }
         
-        button:active { background-color: #0b7dda; transform: scale(0.98); }
+        button:active { background-color: #0b7dda; transform: scale(0.97); }
         
         /* شاشة صغيرة توضح اسم الحركة الحالية */
         #status {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             color: #fff;
             padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 13px;
             pointer-events: none;
             z-index: 10;
+            direction: rtl;
         }
     </style>
 </head>
 <body>
 
-    <div id="status">الحركة الحالية: وضعية الرشاش</div>
+    <div id="status">الحركة الحالية: وضعية الاستعداد بالرشاش</div>
 
     <div id="controls-container">
-        <button onclick="changeAnim('idle', 'وضعية الرشاش الاستعدادية')">1. وضعية الرشاش</button>
-        <button onclick="changeAnim('firing', 'إطلاق النار بالرشاش')">2. إطلاق النار</button>
-        <button onclick="changeAnim('aimTurn', 'التفات وإطلاق بالرشاش')">3. التفات وركل بالرشاش</button>
-        <button onclick="changeAnim('stab', 'الطعن بالخنجر الثنائي')">4. طعن بالخنجر</button>
-        <button onclick="changeAnim('kick', 'ركلة قتال MMA')">5. ركلة MMA</button>
-        <button onclick="changeAnim('jump', 'القفز لأعلى')">6. قفز للأعلى</button>
-        <button onclick="changeAnim('sprintBack', 'الركض السريع للخلف')">7. ركض للخلف</button>
-        <button onclick="changeAnim('dying', 'الموت والوصاية')">8. حركة الموت 1</button>
-        <button onclick="changeAnim('deathRight', 'الموت من الجانب الأيمن')">9. حركة الموت 2</button>
+        <button onclick="changeAnim('anim1', '1. وضعية الاستعداد بالرشاش')">1. وضعية الرشاش</button>
+        <button onclick="changeAnim('anim2', '2. الركض السريع للخلف')">2. ركض للخلف</button>
+        <button onclick="changeAnim('anim3', '3. الطعن بالخنجر الثنائي')">3. طعن بالخنجر</button>
+        <button onclick="changeAnim('anim4', '4. حركة الموت الجانبي')">4. حركة الموت 1</button>
+        <button onclick="changeAnim('anim5', '5. إطلاق النار بالرشاش')">5. إطلاق النار</button>
+        <button onclick="changeAnim('anim6', '6. القفز لأعلى')">6. قفز للأعلى</button>
+        <button onclick="changeAnim('anim7', '7. حركة الموت والسقوط')">7. حركة الموت 2</button>
+        <button onclick="changeAnim('anim8', '8. التفات وركل بالرشاش')">8. التفات وركل</button>
+        <button onclick="changeAnim('anim9', '9. ركلة قتال MMA')">9. ركلة MMA</button>
+        <button onclick="changeAnim('anim10', '10. حركة إضافية 1')">10. حركة مدمجة 1</button>
+        <button onclick="changeAnim('anim11', '11. حركة إضافية 2')">11. حركة مدمجة 2</button>
     </div>
 
     <script type="module">
@@ -74,28 +79,36 @@
         import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a1a);
+        scene.background = new THREE.Color(0x151515);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // إضاءة غنية لكي يظهر اللحم والملابس بوضوح تام
+        // إضاءة غنية لإكساب الجسد والملابس بريقاً ووضوحاً ممتازاً
         const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
         scene.add(ambientLight);
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
-        dirLight.position.set(3, 6, 4);
+        dirLight.position.set(3, 8, 5);
         scene.add(dirLight);
 
         const loader = new GLTFLoader();
         let mixer, currentModel;
 
-        // مكتبة الروابط المباشرة لملفاتك الـ 11 من المجلد المرفوع dpi2444uaxjjq15w
+        // تم تحويل روابط Google Drive الخاصة بك بالكامل إلى روابط استدعاء مباشر للكود البرمجي
         const animationUrls = {
-            
-            jump: 'Https://filebin.net/dpi2444uaxjjq15w',
-            
+            anim1: 'https://docs.google.com/uc?export=download&id=1tJvSZdaxeRLmNWlG114nS9XTJ-wWz-gt',
+            anim2: 'https://docs.google.com/uc?export=download&id=1zIWH4yk30PyQdUBkHcYFVsYwBcdm3OG0',
+            anim3: 'https://docs.google.com/uc?export=download&id=1B5OAtZTRO91N1LGq_gsCO_QthjnpN3-C',
+            anim4: 'https://docs.google.com/uc?export=download&id=1kD155w7OQ0a6azDdCwKIagwCStpvPrtH',
+            anim5: 'https://docs.google.com/uc?export=download&id=1XgDmGoomTZ7Zg97QPHTIQdP1nLS1OKVc',
+            anim6: 'https://docs.google.com/uc?export=download&id=1TRZuY-bcJdfQooWKuP5LzhVIjHDe13pE',
+            anim7: 'https://docs.google.com/uc?export=download&id=1C2_JSabzTbQDJcScCc7SOygtbDsWd_S4',
+            anim8: 'https://docs.google.com/uc?export=download&id=1k4_2yAY17SSYuw0AG88IyOl6NAprPJby',
+            anim9: 'https://docs.google.com/uc?export=download&id=1U3YEzVTxzU41AMRwCjd1-7Xg4vWc73eG',
+            anim10: 'https://docs.google.com/uc?export=download&id=1U3YEzVTxzU41AMRwCjd1-7Xg4vWc73eG', // الرابط المتكرر التاسع
+            anim11: 'https://docs.google.com/uc?export=download&id=127OqA65-lx_iGSnp1UJIlleYIrtBZhJ8'
         };
 
         window.loadModel = function(url) {
@@ -106,7 +119,7 @@
                 currentModel = gltf.scene;
                 scene.add(currentModel);
 
-                // موازنة موضع الشخصية لكي تظهر في المركز
+                // موازنة موضع الشخصية البشرية في مركز الشاشة
                 currentModel.position.set(0, -60, 0);
                 currentModel.scale.set(1, 1, 1); 
 
@@ -116,15 +129,15 @@
                     action.play();
                 }
             }, undefined, (error) => {
-                console.error("خطأ في تحميل الحركة:", error);
+                console.error("جاري الاتصال بالسيرفر وجلب ملف الحركة...");
             });
         }
 
-        // تشغيل الحركة الافتراضية عند البدء
-        window.loadModel(animationUrls.idle);
+        // تشغيل الحركة الأولى تلقائياً عند تحميل الصفحة
+        window.loadModel(animationUrls.anim1);
 
-        // إعدادات الكاميرا المناسبة لأبعاد جسم الرجل البشري عندك
-        camera.position.set(0, 30, 140);
+        // ضبط أبعاد وموقع الكاميرا لتناسب هيكل شخصياتك
+        camera.position.set(0, 30, 145);
         camera.lookAt(0, 30, 0);
 
         const clock = new THREE.Clock();
@@ -136,7 +149,7 @@
         }
         animate();
 
-        // دالة تبديل الحركات عند ضغط الأزرار
+        // دالة تبديل الحركات والملفات عند نقر المستخدم
         window.changeAnim = function(animKey, animName) {
             document.getElementById('status').innerText = "الحركة الحالية: " + animName;
             window.loadModel(animationUrls[animKey]);
