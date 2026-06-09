@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحريك الشخصية بالهاتف</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: Arial, sans-serif; }
+        canvas { display: block; }
+        /* تصميم أزرار التحكم أسفل الشاشة */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button:active { background-color: #e64a19; }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <button id="btn-idle">وضعية الاستعداد</button>
+        <button id="btn-stab">طعن بالخنجر</button>
+        <button id="btn-kick">ركلة MMA</button>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
+        import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+
+        // 1. إعداد المشهد والإضاءة
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(1, 5, 2);
+        scene.add(dirLight);
+
+        const loader = new GLTFLoader();
+        let mixer, currentModel;
+        
+        // كائن يحتوي على مسارات ملفاتك بدقة
+        const animationFiles = {
+            idle: 'Rifle Aiming Idle.glb',
+            stab: 'Double Dagger Stab.glb',
+            kick: 'Mma Kick.glb'
+        };
+
+        // دالة مسؤولة عن تحميل وتشغيل الملف المختار
+        function loadCharacterWithAnimation(fileName) {
+            // إذا كان هناك مجسم معروض، نقوم بحذفه أولاً لتفريغ الذاكرة
+            if (currentModel) scene.remove(currentModel);
+            if (mixer) mixer.stopAllAction();
+
+            loader.load(fileName, (gltf) => {
+                currentModel = gltf.scene;
+                scene.add(currentModel);
+
+                // ضبط موقع الشخصية أمام الكاميرا
+                currentModel.position.set(0, -1, 0);
+                
+                // تشغيل الحركة المدمجة داخل الملف
+                if (gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(currentModel);
+                    const action = mixer.clipAction(gltf.animations[0]);
+                    action.play();
+                }
+            }, undefined, (err) => console.error("خطأ في التحميل:", err));
+        }
+
+        // تشغيل الحركة الافتراضية عند فتح الصفحة (وضعية الاستعداد)
+        loadCharacterWithAnimation(animationFiles.idle);
+
+        camera.position.set(0, 1, 2.5);
+        const clock = new THREE.Clock();
+
+        // حلقة التحديث (Animation Loop)
+        function animate() {
+            requestAnimationFrame(animate);
+            if (mixer) mixer.update(clock.getDelta());
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ربط الأزرار بالدالة لتغيير الحركة عند الضغط
+        document.getElementById('btn-idle').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.idle));
+        document.getElementById('btn-stab').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.stab));
+        document.getElementById('btn-kick').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.kick));
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
