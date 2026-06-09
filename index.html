@@ -3,107 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحريك الشخصية بالهاتف</title>
+    <title>مشاهدة حركات المافيا الـ 11</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: Arial, sans-serif; }
         canvas { display: block; }
-        /* تصميم أزرار التحكم أسفل الشاشة */
-        #controls {
+        
+        /* تصميم قائمة الأزرار الجانبية لتستوعب الـ 11 حركة بدون تشويه الشاشة */
+        #controls-container {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 10px;
+            left: 10px;
+            max-height: 90vh;
+            overflow-y: auto;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
             z-index: 10;
+            padding-right: 10px;
         }
+        
         button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #ff5722;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #2196F3;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            text-align: right;
+            min-width: 150px;
         }
-        button:active { background-color: #e64a19; }
+        
+        button:active { background-color: #0b7dda; transform: scale(0.98); }
+        
+        /* شاشة صغيرة توضح اسم الحركة الحالية */
+        #status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
 
-    <div id="controls">
-        <button id="btn-idle">وضعية الاستعداد</button>
-        <button id="btn-stab">طعن بالخنجر</button>
-        <button id="btn-kick">ركلة MMA</button>
+    <div id="status">الحركة الحالية: وضعية الرشاش</div>
+
+    <div id="controls-container">
+        <button onclick="changeAnim('idle', 'وضعية الرشاش الاستعدادية')">1. وضعية الرشاش</button>
+        <button onclick="changeAnim('firing', 'إطلاق النار بالرشاش')">2. إطلاق النار</button>
+        <button onclick="changeAnim('aimTurn', 'التفات وإطلاق بالرشاش')">3. التفات وركل بالرشاش</button>
+        <button onclick="changeAnim('stab', 'الطعن بالخنجر الثنائي')">4. طعن بالخنجر</button>
+        <button onclick="changeAnim('kick', 'ركلة قتال MMA')">5. ركلة MMA</button>
+        <button onclick="changeAnim('jump', 'القفز لأعلى')">6. قفز للأعلى</button>
+        <button onclick="changeAnim('sprintBack', 'الركض السريع للخلف')">7. ركض للخلف</button>
+        <button onclick="changeAnim('dying', 'الموت والوصاية')">8. حركة الموت 1</button>
+        <button onclick="changeAnim('deathRight', 'الموت من الجانب الأيمن')">9. حركة الموت 2</button>
     </div>
 
     <script type="module">
-        import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
-        import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+        import * as THREE from 'https://template.unbxd.com/prod/v2/js/three.module.js';
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
-        // 1. إعداد المشهد والإضاءة
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        scene.background = new THREE.Color(0x1a1a1a);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-        dirLight.position.set(1, 5, 2);
+        // إضاءة غنية لكي يظهر اللحم والملابس بوضوح تام
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
+        dirLight.position.set(3, 6, 4);
         scene.add(dirLight);
 
         const loader = new GLTFLoader();
         let mixer, currentModel;
-        
-        // كائن يحتوي على مسارات ملفاتك بدقة
-        const animationFiles = {
-            idle: 'Rifle Aiming Idle.glb',
-            stab: 'Double Dagger Stab.glb',
-            kick: 'Mma Kick.glb'
+
+        // مكتبة الروابط المباشرة لملفاتك الـ 11 من المجلد المرفوع dpi2444uaxjjq15w
+        const animationUrls = {
+            idle: 'https://filebin.net/dpi2444uaxjjq15w/Rifle_Aiming_Idle.glb',
+            firing: 'https://filebin.net/dpi2444uaxjjq15w/Firing_Rifle.glb',
+            aimTurn: 'https://filebin.net/dpi2444uaxjjq15w/Rifle_Turn_And_Kick.glb',
+            stab: 'https://filebin.net/dpi2444uaxjjq15w/Double_Dagger_Stab.glb',
+            kick: 'https://filebin.net/dpi2444uaxjjq15w/Mma_Kick.glb',
+            jump: 'https://filebin.net/dpi2444uaxjjq15w/Jump_Up.glb',
+            sprintBack: 'https://filebin.net/dpi2444uaxjjq15w/Sprint_Backward.glb',
+            dying: 'https://filebin.net/dpi2444uaxjjq15w/Dying.glb',
+            deathRight: 'https://filebin.net/dpi2444uaxjjq15w/Death_From_Right.glb'
         };
 
-        // دالة مسؤولة عن تحميل وتشغيل الملف المختار
-        function loadCharacterWithAnimation(fileName) {
-            // إذا كان هناك مجسم معروض، نقوم بحذفه أولاً لتفريغ الذاكرة
+        window.loadModel = function(url) {
             if (currentModel) scene.remove(currentModel);
             if (mixer) mixer.stopAllAction();
 
-            loader.load(fileName, (gltf) => {
+            loader.load(url, (gltf) => {
                 currentModel = gltf.scene;
                 scene.add(currentModel);
 
-                // ضبط موقع الشخصية أمام الكاميرا
-                currentModel.position.set(0, -1, 0);
-                
-                // تشغيل الحركة المدمجة داخل الملف
+                // موازنة موضع الشخصية لكي تظهر في المركز
+                currentModel.position.set(0, -60, 0);
+                currentModel.scale.set(1, 1, 1); 
+
                 if (gltf.animations.length > 0) {
                     mixer = new THREE.AnimationMixer(currentModel);
                     const action = mixer.clipAction(gltf.animations[0]);
                     action.play();
                 }
-            }, undefined, (err) => console.error("خطأ في التحميل:", err));
+            }, undefined, (error) => {
+                console.error("خطأ في تحميل الحركة:", error);
+            });
         }
 
-        // تشغيل الحركة الافتراضية عند فتح الصفحة (وضعية الاستعداد)
-        loadCharacterWithAnimation(animationFiles.idle);
+        // تشغيل الحركة الافتراضية عند البدء
+        window.loadModel(animationUrls.idle);
 
-        camera.position.set(0, 1, 2.5);
+        // إعدادات الكاميرا المناسبة لأبعاد جسم الرجل البشري عندك
+        camera.position.set(0, 30, 140);
+        camera.lookAt(0, 30, 0);
+
         const clock = new THREE.Clock();
-
-        // حلقة التحديث (Animation Loop)
         function animate() {
             requestAnimationFrame(animate);
-            if (mixer) mixer.update(clock.getDelta());
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
             renderer.render(scene, camera);
         }
         animate();
 
-        // ربط الأزرار بالدالة لتغيير الحركة عند الضغط
-        document.getElementById('btn-idle').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.idle));
-        document.getElementById('btn-stab').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.stab));
-        document.getElementById('btn-kick').addEventListener('click', () => loadCharacterWithAnimation(animationFiles.kick));
+        // دالة تبديل الحركات عند ضغط الأزرار
+        window.changeAnim = function(animKey, animName) {
+            document.getElementById('status').innerText = "الحركة الحالية: " + animName;
+            window.loadModel(animationUrls[animKey]);
+        }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
