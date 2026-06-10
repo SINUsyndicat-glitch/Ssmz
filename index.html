@@ -3,143 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستعرض حركات المافيا المحلي</title>
+    <title>تحريك مجسم من الهاتف عبر الرابط</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: Arial, sans-serif; }
-        canvas { display: block; }
-        
-        /* قائمة الأزرار الجانبية للتمرير على الهاتف */
-        #controls-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            max-height: 85vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 10;
-            padding-right: 12px;
-        }
-        
-        button {
-            padding: 10px 14px;
-            font-size: 13px;
-            font-weight: bold;
-            background-color: #e91e63;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            text-align: right;
-            min-width: 160px;
-        }
-        button:active { background-color: #c2185b; transform: scale(0.97); }
-
-        #status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.75);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 10;
-            direction: rtl;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #111; font-family: Arial, sans-serif; }
+        #canvas-container { width: 100vw; height: 80vh; }
+        .controls { width: 100vw; height: 20vh; display: flex; justify-content: center; align-items: center; gap: 10px; background: #222; }
+        button { padding: 15px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; background-color: #ff4757; color: white; cursor: pointer; }
+        button:active { background-color: #ff6b81; }
     </style>
 </head>
 <body>
 
-    <div id="status">الحركة الحالية: وضعية الرشاش</div>
-
-    <div id="controls-container">
-        <button onclick="changeAnim('Rifle Aiming Idle.glb', '1. وضعية الرشاش')">1. وضعية الرشاش</button>
-        <button onclick="changeAnim('Sprint Backward.glb', '2. ركض للخلف')">2. ركض للخلف</button>
-        <button onclick="changeAnim('Double Dagger Stab.glb', '3. طعن بالخنجر')">3. طعن بالخنجر</button>
-        <button onclick="changeAnim('Dying.glb', '4. حركة الموت 1')">4. حركة الموت 1</button>
-        <button onclick="changeAnim('Firing Rifle.glb', '5. إطلاق النار')">5. إطلاق النار</button>
-        <button onclick="changeAnim('Jump Up.glb', '6. قفز للأعلى')">6. قفز للأعلى</button>
-        <button onclick="changeAnim('Death From Right.glb', '7. حركة الموت 2')">7. حركة الموت 2</button>
-        <button onclick="changeAnim('Rifle Turn And Kick.glb', '8. التفات وركل')">8. التفات وركل</button>
-        <button onclick="changeAnim('Mma Kick.glb', '9. ركلة MMA')">9. ركلة MMA</button>
+    <div id="canvas-container"></div>
+    
+    <div class="controls">
+        <button id="runBtn">🏃‍♂️ حركة الجري</button>
+        <button id="shootBtn">💥 قتال وإطلاق نار</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- استدعاء Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 
-    <script>
-        // الكود البرمجي المستقر
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a1a);
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        let scene, camera, renderer, mixer, model;
+        let clock = new THREE.Clock();
 
-        // إضاءة قوية جداً لكساء اللحم والملابس
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.5);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-        dirLight.position.set(3, 10, 5);
-        scene.add(dirLight);
+        init();
 
-        const loader = new THREE.GLTFLoader();
-        let mixer, currentModel;
+        function init() {
+            const container = document.getElementById('canvas-container');
 
-        window.loadModel = function(fileName) {
-            if (currentModel) scene.remove(currentModel);
-            if (mixer) mixer.stopAllAction();
+            // 1. المشهد والكاميرا
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+            
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 2, 5);
 
-            // التحميل محلياً من نفس المجلد
-            loader.load(fileName, (gltf) => {
-                currentModel = gltf.scene;
-                scene.add(currentModel);
+            // 2. الإضاءة
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
+            hemiLight.position.set(0, 20, 0);
+            scene.add(hemiLight);
 
-                // ضبط وضعية المجسم في المنتصف تماماً
-                currentModel.position.set(0, -60, 0);
-                currentModel.scale.set(1, 1, 1); 
+            const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+            dirLight.position.set(3, 10, 10);
+            scene.add(dirLight);
 
-                if (gltf.animations.length > 0) {
-                    mixer = new THREE.AnimationMixer(currentModel);
-                    const action = mixer.clipAction(gltf.animations[0]);
-                    action.play();
+            // 3. المحرك (Renderer) ودعم اللمس للهاتف
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // التحكم بالمجسم باللمس (لف، تكبير)
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.target.set(0, 1, 0);
+
+            // 4. تحميل مجسمك الجامد عبر رابط الـ HTTPS الخاص بك
+            const loader = new GLTFLoader();
+            
+            // ⚠️ ضع رابط الـ https للمجسم الخاص بك هنا بدلاً من الرابط التجريبي
+            const modelURL = 'https://drive.google.com/file/d/17pzwCl03SVdZSF24wJcTkVgp65-tmBeT/view?usp=drivesdk'; 
+
+            loader.load(modelURL, function (gltf) {
+                model = gltf.scene;
+                scene.add(model);
+
+                // إنشاء الـ Mixer المسؤول عن إدارة الحركات
+                mixer = new THREE.AnimationMixer(model);
+
+                // إذا كان الرابط يحتوي على حركات مخفية سيتم قراءتها هنا
+                if (gltf.animations && gltf.animations.length > 0) {
+                    // تشغيل الحركة الأولى تلقائياً كمثال
+                    mixer.clipAction(gltf.animations[0]).play();
                 }
-            }, undefined, (error) => {
-                console.error("الملف غير موجود في المجلد، تأكد من نقل الملفات بجانب index.html");
+
+            }, undefined, function (e) { console.error(e); });
+
+            // 5. أحداث أزرار الهاتف
+            document.getElementById('runBtn').addEventListener('click', () => {
+                simulateMotion('run');
             });
+
+            document.getElementById('shootBtn').addEventListener('click', () => {
+                simulateMotion('shoot');
+            });
+
+            animate();
         }
 
-        // تشغيل الحركة الأولى تلقائياً من الذاكرة
-        window.loadModel('Rifle Aiming Idle.glb');
+        // دالة لمحاكاة الحركات برمجياً في حال كان المجسم جامداً تماماً
+        function simulateMotion(type) {
+            if (!model) return;
 
-        // إعدادات الكاميرا المخصصة لرجال المافيا عندك
-        camera.position.set(0, 30, 140);
-        camera.lookAt(0, 30, 0);
+            if (type === 'run') {
+                // محاكاة حركة الجري برمجياً عبر اهتزاز وتحريك العقد الزاوية (تهز المجسم للأمام والخلف)
+                let time = performance.now() * 0.005;
+                model.position.z = Math.sin(time) * 0.5; // يتقدم ويتراجع
+                model.rotation.y = Math.sin(time) * 0.1; // يميل يميناً ويساراً كأنه يجري
+            } 
+            else if (type === 'shoot') {
+                // محاكاة إطلاق النار (ارتداد سريع للخلف)
+                model.position.z -= 0.2; // ارتداد السلاح
+                setTimeout(() => { model.position.z += 0.2; }, 50);
+            }
+        }
 
-        const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
+            
             const delta = clock.getDelta();
             if (mixer) mixer.update(delta);
+
             renderer.render(scene, camera);
         }
-        animate();
 
-        // دالة تغيير الحركة عند الضغط
-        window.changeAnim = function(fileName, animName) {
-            document.getElementById('status').innerText = "الحركة الحالية: " + animName;
-            window.loadModel(fileName);
-        }
-
+        // ضبط المقاسات عند تدوير الشاشة في الهاتف
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(container.clientWidth, container.clientHeight);
         });
     </script>
 </body>
