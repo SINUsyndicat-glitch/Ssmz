@@ -1,0 +1,1831 @@
+
+
+/* ==========================================================================
+
+   🎨 الجزء الأول: المتغيرات الفاخرة وتهيئة نظام العرض (Root & Reset Engine)
+
+   ========================================================================== */
+
+
+:root {
+
+    /* لوحة الألوان السيبرانية المضيئة */
+
+    --bg-darker: #09090e;      /* لون الخلفية السحيق لمنع تشتت العين */
+
+    --bg-card: #12121f;        /* لون كروت الموديلز والصناديق الخلفية */
+
+    --neon-pink: #ff007f;      /* الوردي الفاقع الخاص بـ +18 والنبض الحركي */
+
+    --neon-cyan: #00f3ff;      /* الأزرق السياني الخاص بالشبكات والـ Web3 */
+
+    --neon-purple: #8b5cf6;    /* البنفسجي الساحر للملاحة والروابط */
+
+    --neon-gold: #ffb700;      /* الذهبي الملكي المخصص للرصيد وهدايا الـ VIP */
+
+    --text-main: #f3f4f6;      /* اللون الأبيض الناعم للنصوص */
+
+    --text-muted: #9ca3af;    /* الرمادي الخافت للنصوص الثانوية والتواريخ */
+
+    
+
+    /* تأثيرات التوهج الشبحية (Glow Effects) */
+
+    --glow-pink: 0 0 10px rgba(255, 0, 127, 0.5), 0 0 20px rgba(255, 0, 127, 0.2);
+
+    --glow-cyan: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.2);
+
+    --glow-gold: 0 0 12px rgba(255, 183, 0, 0.6), 0 0 25px rgba(255, 183, 0, 0.3);
+
+}
+
+
+/* تصفير الهوامش القياسية وتوحيد حساب الأبعاد */
+
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+    font-family: 'Cairo', 'Oxanium', sans-serif;
+
+    -webkit-tap-highlight-color: transparent; /* منع الوميض الأزرق المزعج عند النقر بالموبايل */
+
+}
+
+
+/* تهيئة الهيكل العام لمنع التمرير العشوائي والمحافظة على أبعاد التطبيق */
+
+body {
+
+    background-color: var(--bg-darker);
+
+    color: var(--text-main);
+
+    min-height: 100vh;
+
+    overflow-x: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    line-height: 1.6;
+
+}
+
+
+/* تخصيص أشرطة التمرير الافتراضية للمتصفح لتبدو بريميوم */
+
+::-webkit-scrollbar {
+
+    width: 6px;
+
+    height: 6px;
+
+}
+
+::-webkit-scrollbar-track {
+
+    background: var(--bg-darker);
+
+}
+
+::-webkit-scrollbar-thumb {
+
+    background: #252538;
+
+    border-radius: 10px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+    background: var(--neon-purple);
+
+}
+
+
+/* تأثير أنيميشن الوميض للرصيد عند تحديثه */
+
+@keyframes flashGold {
+
+    0% { filter: brightness(1); text-shadow: none; }
+
+    50% { filter: brightness(1.8); text-shadow: var(--glow-gold); }
+
+    100% { filter: brightness(1); text-shadow: none; }
+
+}
+
+/* ==========================================================================
+
+   🔮 الجزء الثاني: شريط الملاحة العلوي وأشرطة البحث الفوري (Header & Filters)
+
+   ========================================================================== */
+
+
+/* تصميم رأس الصفحة المرتكز في الأعلى */
+
+.main-header {
+
+    background-color: #0d0d16;
+
+    border-bottom: 1px solid #1e1e2f;
+
+    padding: 12px 20px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1000;
+
+}
+
+
+/* حاوية العناصر المرنة لترتيب الشعار والبحث والرصيد */
+
+.header-container {
+
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+}
+
+
+/* منطقة الشعار ونصوص النيون */
+
+.logo-zone {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 20px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+}
+
+.logo-neon {
+
+    color: var(--text-main);
+
+    text-shadow: var(--glow-cyan);
+
+}
+
+.logo-gold {
+
+    color: var(--neon-gold);
+
+    text-shadow: var(--glow-gold);
+
+}
+
+.premium-badge {
+
+    background: linear-gradient(135deg, var(--neon-pink) 0%, #b30059 100%);
+
+    color: #fff;
+
+    font-size: 11px;
+
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+    font-weight: bold;
+
+    box-shadow: var(--glow-pink);
+
+}
+
+
+/* غلاف شريط البحث الذكي */
+
+.search-bar-wrapper {
+
+    position: relative;
+
+    flex: 1;
+
+    max-width: 500px;
+
+}
+
+.search-icon {
+
+    position: absolute;
+
+    right: 12px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--text-muted);
+
+    font-size: 14px;
+
+}
+
+.search-bar-wrapper input {
+
+    width: 100%;
+
+    background-color: #161626;
+
+    border: 1px solid #25253d;
+
+    border-radius: 8px;
+
+    padding: 10px 40px 10px 12px;
+
+    color: var(--text-main);
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition: all 0.3s ease;
+
+}
+
+.search-bar-wrapper input:focus {
+
+    border-color: var(--neon-cyan);
+
+    box-shadow: var(--glow-cyan);
+
+    background-color: #1a1a2e;
+
+}
+
+
+/* بطاقة عرض الرصيد الذهبي */
+
+.wallet-badge-top {
+
+    background: rgba(255, 183, 0, 0.1);
+
+    border: 1px solid rgba(255, 183, 0, 0.3);
+
+    padding: 8px 14px;
+
+    border-radius: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-weight: 700;
+
+    font-size: 14px;
+
+    color: var(--neon-gold);
+
+}
+
+.coin-gold-icon {
+
+    font-size: 16px;
+
+    animation: spinCoin 4s linear infinite;
+
+}
+
+
+/* شريط أزرار التصنيفات والفلترة */
+
+.filter-navigation {
+
+    background-color: var(--bg-darker);
+
+    padding: 10px 20px;
+
+    border-bottom: 1px solid #12121f;
+
+}
+
+.filter-scroll-container {
+
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    gap: 10px;
+
+    overflow-x: auto;
+
+    white-space: nowrap;
+
+}
+
+/* إخفاء شريط التمرير لأزرار الفلترة للحفاظ على الأناقة */
+
+.filter-scroll-container::-webkit-scrollbar {
+
+    display: none;
+
+}
+
+
+.filter-tag-btn {
+
+    background-color: #12121f;
+
+    border: 1px solid #1e1e2f;
+
+    color: var(--text-muted);
+
+    padding: 8px 16px;
+
+    border-radius: 20px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+
+}
+
+.filter-tag-btn:hover {
+
+    color: var(--text-main);
+
+    border-color: #2a2a3f;
+
+}
+
+.filter-tag-btn.active {
+
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+
+    border-color: var(--neon-purple);
+
+    color: var(--text-main);
+
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+
+}
+
+
+/* أنيميشن دوران العملة */
+
+@keyframes spinCoin {
+
+    0% { transform: rotateY(0deg); }
+
+    100% { transform: rotateY(360deg); }
+
+}
+
+
+/* توافق الشاشات الصغيرة (الموبايل) للشريط العلوي */
+
+@media (max-width: 768px) {
+
+    .header-container {
+
+        flex-wrap: wrap;
+
+    }
+
+    .search-bar-wrapper {
+
+        order: 3;
+
+        max-width: 100%;
+
+        flex: calc(100% - 0px);
+
+    }
+
+}
+
+/* ==========================================================================
+
+   🎬 الجزء الثالث: حاوية الأقسام وهندسة البث المباشر (Viewport & Stream Layout)
+
+   ========================================================================== */
+
+
+/* الحاوية المركزية لجميع الصفحات والأقسام */
+
+.app-viewport {
+
+    flex: 1;
+
+    max-width: 1400px;
+
+    width: 100%;
+
+    margin: 0 auto;
+
+    padding: 15px 20px 80px 20px; /* الـ padding السفلي 80px لمنع اختفاء العناصر خلف أزرار الملاحة */
+
+    position: relative;
+
+}
+
+
+/* التنسيق الافتراضي لكل قسم من الأقسام الأربعة */
+
+.app-section {
+
+    display: none; /* إخفاء جميع الأقسام افتراضياً */
+
+    opacity: 0;
+
+    transition: opacity 0.3s ease-in-out;
+
+}
+
+
+/* إظهار القسم النشط فقط المربوط بـ JavaScript */
+
+.app-section.active {
+
+    display: block;
+
+    opacity: 1;
+
+}
+
+
+/* شبكة توزيع شاشة البث والشات (Grid System) */
+
+.stream-layout-grid {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr; /* شاشة الفيديو تأخذ ثلثي المساحة والشات يأخذ الثلث */
+
+    gap: 20px;
+
+    height: calc(100vh - 220px);
+
+    min-height: 500px;
+
+}
+
+
+/* ==================== [عمود الفيديو وبث الـ WebRTC] ==================== */
+
+.video-stream-column {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+
+    height: 100%;
+
+}
+
+
+/* صندوق مشغل الفيديو المظلم الفخم */
+
+#player-container {
+
+    flex: 1;
+
+    background-color: #0b0b12;
+
+    border: 2px solid #1a1a2e;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    position: relative;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+}
+
+
+/* واجهة الانتظار والنص الافتراضي للفيديو */
+
+#video-placeholder {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    color: var(--text-muted);
+
+    width: 90%;
+
+}
+
+.placeholder-play-icon {
+
+    font-size: 50px;
+
+    color: var(--neon-pink);
+
+    text-shadow: var(--glow-pink);
+
+    margin-bottom: 15px;
+
+    animation: pulseGlow 2s infinite;
+
+}
+
+
+/* شريط أزرار التحكم تحت الفيديو */
+
+.stream-controls-bar {
+
+    display: flex;
+
+    gap: 12px;
+
+}
+
+
+/* أزرار التحكم الفخمة */
+
+.control-btn-premium {
+
+    flex: 1;
+
+    background: linear-gradient(135deg, var(--neon-purple) 0%, #5b21b6 100%);
+
+    border: none;
+
+    color: #fff;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    transition: all 0.2s ease;
+
+}
+
+.control-btn-premium:hover {
+
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+
+    transform: translateY(-2px);
+
+}
+
+
+.control-btn-gold {
+
+    flex: 1;
+
+    background: linear-gradient(135deg, var(--neon-gold) 0%, #b45309 100%);
+
+    border: none;
+
+    color: #000;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    transition: all 0.2s ease;
+
+}
+
+.control-btn-gold:hover {
+
+    box-shadow: var(--glow-gold);
+
+    transform: translateY(-2px);
+
+}
+
+
+/* أنيميشن نبض الأيقونة الافتراضية */
+
+@keyframes pulseGlow {
+
+    0% { transform: scale(1); opacity: 0.7; }
+
+    50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 8px var(--neon-pink)); }
+
+    100% { transform: scale(1); opacity: 0.7; }
+
+}
+
+
+/* حركية الموبايل: تحويل شاشة الفيديو والشات فوق بعضهما */
+
+@media (max-width: 992px) {
+
+    .stream-layout-grid {
+
+        grid-template-columns: 1fr;
+
+        height: auto;
+
+    }
+
+    #player-container {
+
+        height: 250px; /* تثبيت طول مشغل الفيديو على الموبايل ليبقى الشات ظاهراً بالأسفل */
+
+    }
+
+}
+
+/* ==========================================================================
+
+   💬 الجزء الرابع: عمود الشات التفاعلي وصندوق الرسائل (Live Chat CSS)
+
+   ========================================================================== */
+
+
+/* عمود الشات الجانبي */
+
+.chat-stream-column {
+
+    display: flex;
+
+    flex-direction: column;
+
+    background-color: #0d0d16;
+
+    border: 1px solid #1a1a2e;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    height: 100%;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+}
+
+
+/* ترويسة الشات النيون */
+
+.chat-header-neon {
+
+    background-color: #12121f;
+
+    padding: 12px 15px;
+
+    border-bottom: 1px solid #1e1e2f;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+.room-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+}
+
+.viewers-count {
+
+    font-size: 11px;
+
+    background: rgba(0, 243, 255, 0.1);
+
+    color: var(--neon-cyan);
+
+    padding: 2px 8px;
+
+    border-radius: 12px;
+
+    border: 1px solid rgba(0, 243, 255, 0.2);
+
+}
+
+
+/* صندوق استعراض الرسائل (مربوط بالـ Scroll التلقائي) */
+
+.chat-messages-box {
+
+    flex: 1;
+
+    padding: 15px;
+
+    overflow-y: auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    font-size: 13px;
+
+}
+
+
+/* السطور والرسائل الافتراضية داخل الشات */
+
+.msg-line {
+
+    background-color: #141424;
+
+    padding: 8px 12px;
+
+    border-radius: 8px;
+
+    border-right: 3px solid var(--neon-purple); /* تمييز الرسائل العادية بخط بنفسجي */
+
+    word-break: break-word;
+
+}
+
+.msg-line strong {
+
+    color: var(--neon-cyan);
+
+    margin-left: 5px;
+
+}
+
+
+/* تنبيهات النظام الإدارية */
+
+.system-notice {
+
+    background-color: rgba(139, 92, 246, 0.05);
+
+    border-right-color: var(--neon-purple);
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    text-align: center;
+
+    border-left: none;
+
+}
+
+
+/* الرسائل الفاخرة الناتجة عن إرسال هدايا VIP كبرى */
+
+.premium-gift {
+
+    background: linear-gradient(135deg, rgba(255, 183, 0, 0.15) 0%, rgba(255, 0, 127, 0.1) 100%);
+
+    border-right-color: var(--neon-gold);
+
+    border-left: 1px solid rgba(255, 183, 0, 0.2);
+
+    box-shadow: 0 0 10px rgba(255, 183, 0, 0.1);
+
+    animation: flashGold 0.8s ease;
+
+}
+
+.premium-gift strong {
+
+    color: var(--neon-gold) !important;
+
+    text-shadow: var(--glow-gold);
+
+}
+
+
+/* منطقة الإدخال السفلية للشات */
+
+.chat-input-footer {
+
+    padding: 12px;
+
+    background-color: #12121f;
+
+    border-top: 1px solid #1e1e2f;
+
+    display: flex;
+
+    gap: 8px;
+
+}
+
+.chat-input-footer input {
+
+    flex: 1;
+
+    background-color: #161626;
+
+    border: 1px solid #25253d;
+
+    border-radius: 8px;
+
+    padding: 10px 12px;
+
+    color: var(--text-main);
+
+    font-size: 13px;
+
+    outline: none;
+
+}
+
+.chat-input-footer input:focus {
+
+    border-color: var(--neon-purple);
+
+}
+
+
+/* زر الإرسال الطائر */
+
+.chat-send-action {
+
+    background: var(--neon-purple);
+
+    border: none;
+
+    color: #fff;
+
+    width: 40px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: background 0.2s;
+
+}
+
+.chat-send-action:hover {
+
+    background: #7c3aed;
+
+}
+
+
+/* تكييف الارتفاع على الموبايل ليصبح الشات صندوقاً مريحاً للتمرير */
+
+@media (max-width: 992px) {
+
+    .chat-stream-column {
+
+        height: 350px;
+
+    }
+
+}
+
+/* ==========================================================================
+
+   🔮 الجزء الخامس: الموديلز، صالة الألعاب، والمحفظة الرقمية (Grid & Dashboards)
+
+   ========================================================================== */
+
+
+/* 1. شبكة كروت الموديلز المتجاوبة */
+
+.models-grid-container {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+
+    gap: 20px;
+
+    padding: 10px 0;
+
+}
+
+
+/* تصميم كارت الموديل المثير */
+
+.model-room-card {
+
+    background-color: var(--bg-card);
+
+    border: 1px solid #1e1e35;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    transition: transform 0.3s ease, border-color 0.3s ease;
+
+}
+
+.model-room-card:hover {
+
+    transform: translateY(-5px);
+
+    border-color: var(--neon-pink);
+
+    box-shadow: 0 5px 15px rgba(255, 0, 127, 0.2);
+
+}
+
+
+/* غلاف الصورة المصغرة والتاغات فوقها */
+
+.card-thumbnail-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+    padding-top: 133%; /* لضبط أبعاد الصورة بنسبة طوليّة ثابتة 3:4 */
+
+    background-color: #09090f;
+
+}
+
+.model-thumb {
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+}
+
+.live-tag {
+
+    position: absolute;
+
+    top: 10px;
+
+    right: 10px;
+
+    background-color: var(--neon-pink);
+
+    color: #fff;
+
+    font-size: 11px;
+
+    padding: 2px 8px;
+
+    border-radius: 4px;
+
+    font-weight: bold;
+
+    box-shadow: var(--glow-pink);
+
+}
+
+.card-viewers {
+
+    position: absolute;
+
+    bottom: 10px;
+
+    left: 10px;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    backdrop-filter: blur(4px);
+
+    color: #fff;
+
+    font-size: 11px;
+
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+}
+
+
+/* بيانات الموديل أسفل الكارت */
+
+.card-info-row {
+
+    padding: 12px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+.model-name {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: var(--text-main);
+
+}
+
+.model-tag-badge {
+
+    font-size: 11px;
+
+    color: var(--neon-cyan);
+
+    background: rgba(0, 243, 255, 0.1);
+
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+}
+
+
+/* 2. صالة الألعاب (Web3 Games Menu) */
+
+.games-menu-wrapper {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+
+}
+
+.game-lobby-card {
+
+    background: linear-gradient(135deg, #12121f 0%, #1a102f 100%);
+
+    border: 1px solid #2a1b4e;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+}
+
+.game-icon-zone {
+
+    font-size: 40px;
+
+    background: rgba(255, 183, 0, 0.1);
+
+    width: 80px;
+
+    height: 80px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid rgba(255, 183, 0, 0.2);
+
+}
+
+.game-details h3 {
+
+    font-size: 18px;
+
+    margin-bottom: 5px;
+
+    color: var(--neon-gold);
+
+}
+
+.game-details p {
+
+    font-size: 13px;
+
+    color: var(--text-muted);
+
+    margin-bottom: 12px;
+
+}
+
+
+/* 3. لوحة تحكم المحفظة والـ Firebase */
+
+.wallet-dashboard-box {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 25px;
+
+}
+
+.balance-card-neon {
+
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+
+    border: 2px dashed rgba(255, 183, 0, 0.4);
+
+    padding: 30px;
+
+    border-radius: 16px;
+
+    text-align: center;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+
+}
+
+.balance-label {
+
+    font-size: 14px;
+
+    color: var(--text-muted);
+
+    margin-bottom: 10px;
+
+}
+
+.balance-card-neon h2 {
+
+    font-size: 36px;
+
+    color: var(--neon-gold);
+
+    text-shadow: var(--glow-gold);
+
+}
+
+
+.firebase-recharge-zone h3 {
+
+    font-size: 16px;
+
+    color: var(--neon-cyan);
+
+    margin-bottom: 8px;
+
+}
+
+.recharge-notice {
+
+    font-size: 13px;
+
+    color: var(--text-muted);
+
+    margin-bottom: 15px;
+
+}
+
+.recharge-options-grid {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 15px;
+
+}
+
+.recharge-tile {
+
+    background-color: var(--bg-card);
+
+    border: 1px solid #1e1e35;
+
+    color: var(--text-main);
+
+    padding: 15px;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    font-size: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    transition: all 0.2s;
+
+}
+
+.recharge-tile:hover {
+
+    border-color: var(--neon-purple);
+
+    background-color: #18182c;
+
+}
+
+
+/* ضبط الموبايل لقسم المحفظة والألعاب */
+
+@media (max-width: 600px) {
+
+    .game-lobby-card {
+
+        flex-direction: column;
+
+        text-align: center;
+
+    }
+
+    .recharge-options-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+/* ==========================================================================
+
+   👑 الجزء السادس والأخير: شريط الملاحة السفلي والنوافذ المنبثقة (Bottom Nav & Modals)
+
+   ========================================================================== */
+
+
+/* 1. شريط التنقل السفلي المثبت (Fixed Bottom Navigation) */
+
+.bottom-nav {
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    background: rgba(13, 13, 22, 0.85); /* خلفية داكنة شبه شفافة */
+
+    backdrop-filter: blur(12px);         /* تأثير الزجاج الضبابي الفخم */
+
+    -webkit-backdrop-filter: blur(12px);
+
+    border-top: 1px solid #1e1e35;
+
+    display: flex;
+
+    justify-content: space-around;
+
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom)) 0; /* دعم انحناءات شاشات الآيفون الحديثة */
+
+    z-index: 2000;
+
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.6);
+
+}
+
+
+/* الأزرار الداخلية لشريط الملاحة */
+
+.nav-item {
+
+    background: none;
+
+    border: none;
+
+    color: var(--text-muted);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 4px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    flex: 1;
+
+}
+
+.nav-icon {
+
+    font-size: 18px;
+
+}
+
+.nav-text {
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+/* حالة الزر النشط المستدعى بالـ JavaScript */
+
+.nav-item.active {
+
+    color: var(--neon-pink);
+
+    text-shadow: var(--glow-pink);
+
+}
+
+.nav-item.active .nav-icon {
+
+    transform: scale(1.15); /* تضخيم خفيف للأيقونة النشطة */
+
+}
+
+
+/* 2. طبقة الحجب الخلفية للنوافذ (Modal Overlay) */
+
+.modal-overlay {
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    background: rgba(5, 5, 10, 0.85);
+
+    backdrop-filter: blur(8px);
+
+    display: none; /* مخفية افتراضياً ويتحكم بها الـ JS */
+
+    align-items: center;
+
+    justify-content: center;
+
+    z-index: 3000;
+
+    padding: 20px;
+
+}
+
+
+/* الصندوق النيوني الموحد للنافذة المنبثقة */
+
+.neon-modal-box {
+
+    background-color: var(--bg-card);
+
+    border: 2px solid #1e1e38;
+
+    border-radius: 20px;
+
+    width: 100%;
+
+    max-width: 550px;
+
+    padding: 25px;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    position: relative;
+
+}
+
+
+/* متجر الهدايا الـ 50 الموسع */
+
+.extensive-gift-store {
+
+    max-width: 800px; /* زيادة العرض لاستيعاب شبكة الهدايا الضخمة */
+
+}
+
+
+.modal-header-neon {
+
+    text-align: center;
+
+    margin-bottom: 20px;
+
+    border-bottom: 1px solid #1e1e35;
+
+    padding-bottom: 15px;
+
+}
+
+.modal-header-neon h2 {
+
+    font-size: 18px;
+
+    color: var(--text-main);
+
+    margin-bottom: 5px;
+
+}
+
+.modal-header-neon p {
+
+    font-size: 12px;
+
+    color: var(--text-muted);
+
+}
+
+
+/* شريط التبويب الداخلي لمتجر الهدايا */
+
+.gift-tabs-navigation {
+
+    display: flex;
+
+    gap: 8px;
+
+    overflow-x: auto;
+
+    margin-bottom: 15px;
+
+    padding-bottom: 5px;
+
+}
+
+.gift-tabs-navigation::-webkit-scrollbar {
+
+    display: none;
+
+}
+
+.gift-tab-btn {
+
+    background-color: #161626;
+
+    border: 1px solid #25253d;
+
+    color: var(--text-muted);
+
+    padding: 6px 12px;
+
+    border-radius: 15px;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+}
+
+.gift-tab-btn.active {
+
+    border-color: var(--neon-pink);
+
+    color: #fff;
+
+    background-color: rgba(255, 0, 127, 0.1);
+
+}
+
+
+/* شبكة عرض الـ 50 هدية */
+
+.gifts-display-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+
+}
+
+
+/* كارت الهدية المفردة */
+
+.gift-item-card {
+
+    background-color: #151526;
+
+    border: 1px solid #22223a;
+
+    border-radius: 12px;
+
+    padding: 12px 8px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: all 0.2s;
+
+}
+
+.gift-item-card:hover {
+
+    border-color: var(--neon-purple);
+
+    transform: scale(1.04);
+
+    background-color: #1a1a30;
+
+}
+
+.gift-visual {
+
+    font-size: 28px;
+
+    margin-bottom: 6px;
+
+}
+
+.gift-meta h4 {
+
+    font-size: 11px;
+
+    color: var(--text-main);
+
+    margin-bottom: 4px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+.price-tag {
+
+    font-size: 10px;
+
+    color: var(--text-muted);
+
+    font-weight: bold;
+
+}
+
+
+/* تمييز الهدايا الأسطورية الكبرى (41 - 50) */
+
+.premium-card {
+
+    border-color: rgba(255, 183, 0, 0.3);
+
+    background: linear-gradient(135deg, #161626 0%, #2a2008 100%);
+
+}
+
+.premium-card:hover {
+
+    border-color: var(--neon-gold);
+
+    box-shadow: 0 0 10px rgba(255, 183, 0, 0.2);
+
+}
+
+.gold-text {
+
+    color: var(--neon-gold);
+
+}
+
+
+/* أزرار العمليات (إغلاق / إرسال) */
+
+.close-modal-action-btn, .submit-auth-btn {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    border: none;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    transition: all 0.2s;
+
+}
+
+.close-modal-action-btn {
+
+    background-color: #1e1e2f;
+
+    color: var(--text-main);
+
+}
+
+.close-modal-action-btn:hover {
+
+    background-color: #28283f;
+
+}
+
+.submit-auth-btn {
+
+    background: linear-gradient(135deg, var(--neon-pink) 0%, #cc0066 100%);
+
+    color: #fff;
+
+    box-shadow: var(--glow-pink);
+
+    margin-top: 15px;
+
+}
+
+
+/* حقول المدخلات في استمارة التحقق */
+
+.input-field-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin-bottom: 15px;
+
+}
+
+.input-field-group label {
+
+    font-size: 12px;
+
+    color: var(--text-muted);
+
+}
+
+.input-field-group input, .input-field-group select {
+
+    background-color: #151526;
+
+    border: 1px solid #25253d;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    color: #fff;
+
+    outline: none;
+
+    font-size: 13px;
+
+}
+
+.input-field-group input:focus, .input-field-group select:focus {
+
+    border-color: var(--neon-pink);
+
+}
+
+
+.interests-checkbox-grid {
+
+    display: flex;
+
+    gap: 15px;
+
+    background-color: #151526;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    border: 1px solid #25253d;
+
+}
+
+.cb-label {
+
+    font-size: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    cursor: pointer;
+
+}
+
+
+/* تخصيص السكرول بار الداخلي للمودال */
+
+.custom-scrollbar-vip::-webkit-scrollbar {
+
+    width: 4px;
+
+}
+
+.custom-scrollbar-vip::-webkit-scrollbar-thumb {
+
+    background: #25253d;
+
+    border-radius: 4px;
+
+}
+
+
+/* إخفاء كافة الأقسام الرئيسية بشكل افتراضي */
+.app-section {
+    display: none !important;
+}
+
+/* إظهار القسم الذي يحتوي على كلاس active فقط */
+.app-section.active {
+    display: block !important; /* أو grid حسب توزيع عناصر التصميم لديك */
+}
+
+
